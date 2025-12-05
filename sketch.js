@@ -1,5 +1,4 @@
-//public domain music
-
+let aliensound;
 let x;
 let y;
 let xSpeed = 2;
@@ -8,13 +7,18 @@ let gameState = "start";
 let img;
 let img2;
 let img3;
+let gameEnded = false;
+let hasbeen2forest = false;
 
 function preload() {
   img = loadImage("images/tree1.png");
   img2 = loadImage("images/tree2.png");
   img3 = loadImage("images/wolfpack.png");
   img4= loadImage("images/tinytown.png");
+  img5= loadImage("images/carbye.png");
+  aliensound = loadSound("music/gamesound.mp3"); 
 }
+
 
 function setup() {
   createCanvas(600, 500);
@@ -45,6 +49,7 @@ function draw() {
   noStroke();
   rect(0, 400, 700, 600);
 
+  
   // Game States
   if (gameState === "start") {
     fill(200, 200, 0);
@@ -57,6 +62,9 @@ function draw() {
     );
   } 
   else if (gameState === "left") {
+    if (!hasbeen2forest) {
+      hasbeen2forest = true;
+    } 
   /*image(img2, 325, 310, 100, 100);
     image(img,  400, 300, 100, 100);
     image(img2, 350, 310, 100, 100);
@@ -83,7 +91,7 @@ function draw() {
     }
   }
 
-// Draw the wolfpack image once
+// Draw the wolfpack 
 image(img3, 230, 350, 100, 50);
     
     fill(200, 200, 0);
@@ -107,15 +115,24 @@ image(img3, 230, 350, 100, 50);
     );
   } 
   else if (gameState === "driver") {
+   image(img5,300,310,100, 100);
+    
     fill(200, 200, 0);
     textSize(20);
     textAlign(CENTER, BOTTOM);
     text(
-      "You flag down the driver and jump in the car.\n There is no time for stranger danger.",
+      "You flag down the driver and jump in the car.\n There is no time for stranger danger. \n\n Press the space bar",
       width / 2,
       height / 2
     );
   }
+else if (gameState === "gameEnded") {
+    fill(200, 200, 0);
+    textSize(20);
+    textAlign(CENTER, BOTTOM);
+    text(". . . or is there?", width / 2, height / 2);
+  }
+  
 
   // UFO Animation (runs regardless of gameState)
   x += xSpeed;
@@ -128,12 +145,50 @@ image(img3, 230, 350, 100, 50);
   text("🛸", x, y);
 }
 
-function keyPressed() {
-  if (keyCode === LEFT_ARROW || key === "l" || key === "L") {
-    gameState = "left";
-  } else if (keyCode === RIGHT_ARROW || key === "r" || key === "R") {
-    gameState = "right";
-  } else if (key === "f" || key === "F") {
-    gameState = "driver";
+
+ 
+    function keyPressed() {
+  // Play music only once (don't pause or restart it)
+  if (key === 'l' || key === 'L' || key === 'r' || key === 'R' || key === 'f' || key === 'F') {
+    if (!aliensound.isPlaying()) {
+      aliensound.play();
+    }
   }
+
+  // Restart the game if it's over and space is pressed
+  if (gameEnded && key === ' ') {
+    restartGame();
+    return; // 
+  }
+
+  // Handle game state transitions
+  if (!gameEnded) {
+    if (gameState === "start") {
+      if (key === "l" || key === "L" || keyCode === LEFT_ARROW) {
+        gameState = "left";
+      } else if (key === "r" || key === "R" || keyCode === RIGHT_ARROW) {
+        gameState = "right";
+      }
+    } else if (gameState === "right") {
+      if (key === "f" || key === "F") {
+        gameState = "driver";
+      }
+    } else if (gameState === "left") {
+      if (key === "r" || key === "R" || keyCode === RIGHT_ARROW) {
+        gameState = "driver";
+      }
+    } else if (gameState === "driver") {
+      if (key === " ") {
+        gameState = "gameEnded";
+        gameEnded = true;
+      }
+    }
+  }
+}
+function restartGame() {
+    // Restart the game if it's over and space is pressed
+  gameState = "start";
+  gameEnded = false;
+  x = 50;
+  y = 50;
 }
